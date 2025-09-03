@@ -1,8 +1,11 @@
 import { useState } from "react";
-import { View, Text, TextInput, Button, Image, ScrollView, TouchableOpacity, StyleSheet } from "react-native";
+import { View, Text, TextInput, Button, Image, ScrollView, TouchableOpacity, StyleSheet, Alert } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import * as ImagePicker from "expo-image-picker";
+import { useRouter } from "expo-router";
 import Header from "../components/Header";
+import { Product } from "../../types/types";
+import { usePostContext } from "../../context/PostContext"; // Adjusted import path
 
 export default function PostAd() {
   const [title, setTitle] = useState<string>("");
@@ -10,6 +13,8 @@ export default function PostAd() {
   const [price, setPrice] = useState<string>("");
   const [description, setDescription] = useState<string>("");
   const [image, setImage] = useState<string | null>(null);
+  const router = useRouter();
+  const { addPost } = usePostContext();
 
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -18,7 +23,7 @@ export default function PostAd() {
       aspect: [4, 3],
       quality: 1,
     });
-    if (!result.canceled) {
+    if (!result.canceled && result.assets && result.assets.length > 0) {
       setImage(result.assets[0].uri);
     }
   };
@@ -28,8 +33,26 @@ export default function PostAd() {
   };
 
   const submitAd = () => {
-    console.log({ title, category, price, description, image });
-    alert("Ad posted! (Dummy action)");
+    if (title && price && description && image) {
+      const newPost: Product = {
+        id: Date.now().toString(), // Unique ID using timestamp
+        title,
+        price,
+        description,
+        image,
+        category,
+      };
+      addPost(newPost);
+      Alert.alert("Success", `Ad posted successfully on ${new Date().toLocaleString("en-US", { timeZone: "Asia/Colombo" })}!`);
+      // Reset form
+      setTitle("");
+      setPrice("");
+      setDescription("");
+      setImage(null);
+      router.push("/"); // Navigate to home page
+    } else {
+      Alert.alert("Error", "Please fill all fields and upload an image");
+    }
   };
 
   return (
@@ -38,11 +61,15 @@ export default function PostAd() {
       <ScrollView style={styles.scrollView}>
         <Text style={styles.title}>Post Ad</Text>
         <TextInput placeholder="Title" value={title} onChangeText={setTitle} style={styles.input} />
-        <Picker selectedValue={category} onValueChange={setCategory} style={styles.picker}>
-          <Picker.Item label="Cars" value="Cars" />
+        <Picker selectedValue={category} onValueChange={(value) => setCategory(value)} style={styles.picker}>
+          <Picker.Item label="Vehicles" value="Vehicles" />
           <Picker.Item label="Properties" value="Properties" />
           <Picker.Item label="Jobs" value="Jobs" />
           <Picker.Item label="Electronics" value="Electronics" />
+          <Picker.Item label="Animals" value="Animals" />
+          <Picker.Item label="Sports" value="Sports" />
+          <Picker.Item label="Educations" value="Educations" />
+          <Picker.Item label="Fashion & Beauty" value="Fashion & Beauty" />
         </Picker>
         <TextInput placeholder="Price" value={price} onChangeText={setPrice} keyboardType="numeric" style={styles.input} />
         <TextInput placeholder="Description" value={description} onChangeText={setDescription} multiline style={styles.input} />
