@@ -4,6 +4,7 @@ export interface Product {
   price: string;
   description: string;
   image: string;
+  category: string;
 }
 
 export interface Chat {
@@ -12,4 +13,13 @@ export interface Chat {
   lastMessage: string;
   time: string;
   image: string;
+}
+
+export interface User {
+  username: string;
+  password: string;
+  name: string;
+  contactNumber: string;
+  address: string;
+  email: string;
 }
