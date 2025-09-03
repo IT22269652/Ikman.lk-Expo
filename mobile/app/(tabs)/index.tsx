@@ -1,9 +1,10 @@
 import { View, Text, FlatList, TouchableOpacity, Image, StyleSheet } from "react-native";
 import Header from "../components/Header";
-import { useRouter } from "expo-router";
+import { useRouter, useLocalSearchParams } from "expo-router";
+import { usePostContext } from "../../context/PostContext";
+import { Product } from "../../types/types";
 
-
-const categories = [
+const initialCategories = [
   { id: "1", name: "Vehicles", image: "https://www.chevrolet.com/content/dam/chevrolet/na/us/english/index/index-sub-content/rotator/01-images/25-ch-electric-blazerev-rotator-v2.jpg?imwidth=1920", key: "vehicles" },
   { id: "2", name: "Electronics", image: "https://images.pexels.com/photos/356056/pexels-photo-356056.jpeg?cs=srgb&dl=pexels-pixabay-356056.jpg&fm=jpg", key: "electronics" },
   { id: "3", name: "Jobs", image: "https://media.istockphoto.com/id/1198042442/photo/beautiful-female-manager-at-a-factory-holding-a-tablet-and-team-of-blue-collar-workers.jpg?s=612x612&w=0&k=20&c=bt35oK8UUYyM_XfzvfBenvNpdCuqdviNSW-CLUEIrQg=", key: "jobs" },
@@ -16,6 +17,16 @@ const categories = [
 
 export default function Home() {
   const router = useRouter();
+  const { posts } = usePostContext();
+  const { searchQuery } = useLocalSearchParams<{ searchQuery?: string }>();
+  const filteredCategories = initialCategories.filter((category) =>
+    category.name.toLowerCase().includes((searchQuery as string)?.toLowerCase() || "")
+  );
+
+  const categoryPosts = filteredCategories.map((category) => ({
+    ...category,
+    posts: posts.filter((post) => post.category === category.key),
+  }));
 
   return (
     <View style={styles.container}>
@@ -26,19 +37,27 @@ export default function Home() {
       />
       <Text style={styles.categoryTitle}>Browse Categories</Text>
       <FlatList
-        data={categories}
+        data={categoryPosts}
         keyExtractor={(item) => item.id}
         numColumns={2}
         contentContainerStyle={styles.categoryGrid}
         renderItem={({ item }) => (
-          <TouchableOpacity 
-            style={styles.categoryItem} 
+          <TouchableOpacity
+            style={styles.categoryItem}
             onPress={() => router.push(`/(tabs)/${item.key}`)}
           >
             <Image source={{ uri: item.image }} style={styles.categoryImage} />
             <Text style={styles.categoryText}>{item.name}</Text>
+            {item.posts.length > 0 && (
+              <Text style={styles.postCount}>Posts: {item.posts.length}</Text>
+            )}
           </TouchableOpacity>
         )}
+        ListEmptyComponent={
+          searchQuery ? (
+            <Text style={styles.emptyText}>No categories found for "{searchQuery}".</Text>
+          ) : null
+        }
       />
     </View>
   );
@@ -61,7 +80,7 @@ const styles = StyleSheet.create({
     flex: 1,
     margin: 10,
     alignItems: "center",
-    backgroundColor: "#eae9e9ff",
+    backgroundColor: "#ffffffff",
     borderRadius: 10,
     padding: 10,
     elevation: 2,
@@ -79,5 +98,14 @@ const styles = StyleSheet.create({
   categoryText: {
     fontSize: 16,
     textAlign: "center",
+  },
+  postCount: {
+    fontSize: 14,
+    color: "#555",
+  },
+  emptyText: {
+    textAlign: "center",
+    padding: 20,
+    color: "#888",
   },
 });

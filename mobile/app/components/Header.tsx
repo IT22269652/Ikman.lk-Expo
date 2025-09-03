@@ -1,19 +1,86 @@
-import { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, Image, Modal, StyleSheet } from "react-native";
+import React, { useState } from "react";
+import { View, Text, TextInput, TouchableOpacity, Image, Modal, StyleSheet, Alert } from "react-native";
+import { useRouter } from "expo-router";
+
+interface User {
+  username: string;
+  password: string;
+  name: string;
+  contactNumber: string;
+  address: string;
+  email: string;
+}
 
 export default function Header() {
   const [isLoginVisible, setIsLoginVisible] = useState(false);
   const [isRegisterVisible, setIsRegisterVisible] = useState(false);
+  const [users, setUsers] = useState<User[]>([]); // Dummy user storage
+  const [searchQuery, setSearchQuery] = useState(""); // State for search input
+  const router = useRouter();
+
+  // Registration form state
+  const [name, setName] = useState("");
+  const [contactNumber, setContactNumber] = useState("");
+  const [address, setAddress] = useState("");
+  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState("");
+
+  // Login form state
+  const [loginUsername, setLoginUsername] = useState("");
+  const [loginPassword, setLoginPassword] = useState("");
+
+  const handleRegister = () => {
+    if (name && contactNumber && address && password && email) {
+      const newUser: User = { username: email, password, name, contactNumber, address, email };
+      setUsers([...users, newUser]);
+      setIsRegisterVisible(false);
+      setIsLoginVisible(true);
+      // Reset form
+      setName("");
+      setContactNumber("");
+      setAddress("");
+      setPassword("");
+      setEmail("");
+    } else {
+      Alert.alert("Error", "Please fill all fields");
+    }
+  };
+
+  const handleLogin = () => {
+    const user = users.find(
+      (u) => u.username === loginUsername && u.password === loginPassword
+    );
+    if (user) {
+      Alert.alert("Success", "Registration Successful!");
+      setIsLoginVisible(false);
+      router.push("/"); // Navigate to home page
+      // Reset login form
+      setLoginUsername("");
+      setLoginPassword("");
+    } else {
+      Alert.alert("Error", "Invalid username or password");
+    }
+  };
+
+  const handleSearch = () => {
+    router.push({
+      pathname: "/",
+      params: { searchQuery },
+    });
+  };
 
   return (
     <View style={styles.header}>
-      <TouchableOpacity style={styles.logo} onPress={() => console.log("ikman.lk pressed")}>
+      <TouchableOpacity style={styles.logo} onPress={() => router.push("/")}>
         <Text style={styles.logoText}>ikman.lk</Text>
       </TouchableOpacity>
       
       <TextInput
         style={styles.searchInput}
         placeholder="Search..."
+        value={searchQuery}
+        onChangeText={setSearchQuery}
+        onSubmitEditing={handleSearch} // Trigger search on "Enter"
       />
       <TouchableOpacity style={styles.button} onPress={() => setIsLoginVisible(true)}>
         <Text style={styles.buttonText}>Login</Text>
@@ -32,12 +99,29 @@ export default function Header() {
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>Login</Text>
-            <TextInput style={styles.modalInput} placeholder="Username" />
-            <TextInput style={styles.modalInput} placeholder="Password" secureTextEntry />
-            <Text style={styles.registerLink} onPress={() => { setIsLoginVisible(false); setIsRegisterVisible(true); }}>
+            <TextInput
+              style={styles.modalInput}
+              placeholder="Username (Email)"
+              value={loginUsername}
+              onChangeText={setLoginUsername}
+            />
+            <TextInput
+              style={styles.modalInput}
+              placeholder="Password"
+              value={loginPassword}
+              onChangeText={setLoginPassword}
+              secureTextEntry
+            />
+            <Text
+              style={styles.registerLink}
+              onPress={() => {
+                setIsLoginVisible(false);
+                setIsRegisterVisible(true);
+              }}
+            >
               Don't have an account? Register
             </Text>
-            <TouchableOpacity style={styles.modalButton} onPress={() => setIsLoginVisible(false)}>
+            <TouchableOpacity style={styles.modalButton} onPress={handleLogin}>
               <Text style={styles.modalButtonText}>Login</Text>
             </TouchableOpacity>
             <TouchableOpacity onPress={() => setIsLoginVisible(false)}>
@@ -57,15 +141,49 @@ export default function Header() {
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>Register</Text>
-            <TextInput style={styles.modalInput} placeholder="Name" />
-            <TextInput style={styles.modalInput} placeholder="Contact Number" keyboardType="phone-pad" />
-            <TextInput style={styles.modalInput} placeholder="Address" />
-            <TextInput style={styles.modalInput} placeholder="Password" secureTextEntry />
-            <TextInput style={styles.modalInput} placeholder="Email" keyboardType="email-address" />
-            <Text style={styles.loginLink} onPress={() => { setIsRegisterVisible(false); setIsLoginVisible(true); }}>
+            <TextInput
+              style={styles.modalInput}
+              placeholder="Name"
+              value={name}
+              onChangeText={setName}
+            />
+            <TextInput
+              style={styles.modalInput}
+              placeholder="Contact Number"
+              value={contactNumber}
+              onChangeText={setContactNumber}
+              keyboardType="phone-pad"
+            />
+            <TextInput
+              style={styles.modalInput}
+              placeholder="Address"
+              value={address}
+              onChangeText={setAddress}
+            />
+            <TextInput
+              style={styles.modalInput}
+              placeholder="Password"
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry
+            />
+            <TextInput
+              style={styles.modalInput}
+              placeholder="Email"
+              value={email}
+              onChangeText={setEmail}
+              keyboardType="email-address"
+            />
+            <Text
+              style={styles.loginLink}
+              onPress={() => {
+                setIsRegisterVisible(false);
+                setIsLoginVisible(true);
+              }}
+            >
               Have an account? Login
             </Text>
-            <TouchableOpacity style={styles.modalButton} onPress={() => setIsRegisterVisible(false)}>
+            <TouchableOpacity style={styles.modalButton} onPress={handleRegister}>
               <Text style={styles.modalButtonText}>Register</Text>
             </TouchableOpacity>
             <TouchableOpacity onPress={() => setIsRegisterVisible(false)}>
