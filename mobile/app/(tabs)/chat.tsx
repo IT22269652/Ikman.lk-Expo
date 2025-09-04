@@ -3,15 +3,16 @@ import { View, Text, FlatList, TouchableOpacity, TextInput, StyleSheet, Image } 
 import Header from "../components/Header";
 import { Chat } from "../../types/types";
 
-const chats: Chat[] = [
+const initialChats: Chat[] = [
   { id: "1", name: "John Doe", lastMessage: "Interested in your car!", time: "10:30 AM", image: "https://randomuser.me/api/portraits/men/1.jpg" },
   { id: "2", name: "Jane Smith", lastMessage: "Can you send more photos?", time: "09:15 AM", image: "https://randomuser.me/api/portraits/women/2.jpg" },
   { id: "3", name: "Ali Khan", lastMessage: "What’s the price?", time: "Yesterday", image: "https://randomuser.me/api/portraits/men/3.jpg" },
 ];
 
-export default function ChatScreen() { // Renamed from Chat to ChatScreen
+export default function ChatScreen() {
   const [selectedChat, setSelectedChat] = useState<Chat | null>(null);
   const [message, setMessage] = useState<string>("");
+  const [chatMessages, setChatMessages] = useState<{ text: string; sender: string; time: string }[]>([]);
 
   const renderChatItem = ({ item }: { item: Chat }) => (
     <TouchableOpacity style={styles.chatItem} onPress={() => setSelectedChat(item)}>
@@ -24,13 +25,25 @@ export default function ChatScreen() { // Renamed from Chat to ChatScreen
     </TouchableOpacity>
   );
 
+  const handleSendMessage = () => {
+    if (message.trim() && selectedChat) {
+      const newMessage = {
+        text: message.trim(),
+        sender: "You",
+        time: new Date().toLocaleTimeString("en-US", { timeZone: "Asia/Colombo", hour: "2-digit", minute: "2-digit" }),
+      };
+      setChatMessages((prevMessages) => [...prevMessages, newMessage]);
+      setMessage(""); // Clear input after sending
+    }
+  };
+
   return (
     <View style={styles.container}>
       <Header />
       <View style={styles.mainContent}>
         <View style={styles.chatList}>
           <FlatList
-            data={chats}
+            data={initialChats}
             keyExtractor={(item) => item.id}
             renderItem={renderChatItem}
             ListHeaderComponent={<Text style={styles.chatHeader}>Messages</Text>}
@@ -47,6 +60,11 @@ export default function ChatScreen() { // Renamed from Chat to ChatScreen
               <Text style={styles.receivedMessage}>{selectedChat.name}: Yes, it is!</Text>
               <Text style={styles.message}>You: Great, can we meet tomorrow?</Text>
               <Text style={styles.receivedMessage}>{selectedChat.name}: Sure, let’s discuss time.</Text>
+              {chatMessages.map((msg, index) => (
+                <Text key={index} style={msg.sender === "You" ? styles.message : styles.receivedMessage}>
+                  {msg.sender}: {msg.text} <Text style={styles.messageTime}>({msg.time})</Text>
+                </Text>
+              ))}
             </View>
             <View style={styles.inputContainer}>
               <TextInput
@@ -55,8 +73,9 @@ export default function ChatScreen() { // Renamed from Chat to ChatScreen
                 onChangeText={setMessage}
                 placeholder="Type a message..."
                 placeholderTextColor="#888"
+                onSubmitEditing={handleSendMessage}
               />
-              <TouchableOpacity style={styles.sendButton}>
+              <TouchableOpacity style={styles.sendButton} onPress={handleSendMessage}>
                 <Text style={styles.sendButtonText}>Send</Text>
               </TouchableOpacity>
             </View>
@@ -74,7 +93,7 @@ export default function ChatScreen() { // Renamed from Chat to ChatScreen
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#f8f9fa" },
   mainContent: { flex: 1, flexDirection: "row" },
-  chatList: { width: "35%", backgroundColor: "#fff", borderRightWidth: 1, borderRightColor: "#ddd" },
+  chatList: { width: "50%", backgroundColor: "#fff", borderRightWidth: 1, borderRightColor: "#ddd" },
   chatHeader: {
     fontSize: 18,
     fontWeight: "bold",
@@ -150,4 +169,5 @@ const styles = StyleSheet.create({
   sendButtonText: { color: "white", fontSize: 16, fontWeight: "bold" },
   noChatSelected: { flex: 1, justifyContent: "center", alignItems: "center" },
   noChatText: { fontSize: 18, color: "#666" },
+  messageTime: { fontSize: 12, color: "#888" },
 });
