@@ -30,20 +30,55 @@ export default function Header() {
   const [loginPassword, setLoginPassword] = useState("");
 
   const handleRegister = () => {
-    if (name && contactNumber && address && password && email) {
-      const newUser: User = { username: email, password, name, contactNumber, address, email };
-      setUsers([...users, newUser]);
-      setIsRegisterVisible(false);
-      setIsLoginVisible(true);
-      // Reset form
-      setName("");
-      setContactNumber("");
-      setAddress("");
-      setPassword("");
-      setEmail("");
-    } else {
-      Alert.alert("Error", "Please fill all fields");
+    // Validation checks
+    const nameRegex = /^[a-zA-Z\s]+$/;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!name) {
+      Alert.alert("Error", "Name is required");
+      return;
+    } else if (!nameRegex.test(name)) {
+      Alert.alert("Error", "Name must contain only letters and spaces");
+      return;
     }
+
+    if (!contactNumber) {
+      Alert.alert("Error", "Contact number is required");
+      return;
+    } 
+
+    if (!address) {
+      Alert.alert("Error", "Address is required");
+      return;
+    }
+
+    if (!password) {
+      Alert.alert("Error", "Password is required");
+      return;
+    } else if (password.length < 6) {
+      Alert.alert("Error", "Password must be at least 6 characters long");
+      return;
+    }
+
+    if (!email) {
+      Alert.alert("Error", "Email is required");
+      return;
+    } else if (!emailRegex.test(email)) {
+      Alert.alert("Error", "Please enter a valid email address");
+      return;
+    }
+
+    // If all validations pass
+    const newUser: User = { username: email, password, name, contactNumber, address, email };
+    setUsers([...users, newUser]);
+    setIsRegisterVisible(false);
+    setIsLoginVisible(true);
+    // Reset form
+    setName("");
+    setContactNumber("");
+    setAddress("");
+    setPassword("");
+    setEmail("");
   };
 
   const handleLogin = () => {

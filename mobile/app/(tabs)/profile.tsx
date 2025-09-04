@@ -7,7 +7,7 @@ import Header from "../components/Header";
 export default function Profile() {
   const [isEditing, setIsEditing] = useState(false);
   const [name, setName] = useState("Nuradha Dakshina");
-  const [address, setAddress] = useState("123, Main Street, Colombo");
+  const [address, setAddress] = useState("Matara");
   const [email, setEmail] = useState("nuradha@example.com");
   const [contact, setContact] = useState("+94 71 234 5678");
   const router = useRouter();

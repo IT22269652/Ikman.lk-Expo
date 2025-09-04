@@ -32,27 +32,53 @@ export default function PostAd() {
     setImage(null);
   };
 
+  const validateTitle = (title: string) => {
+    return title.trim().length >= 3;
+  };
+
+  const validatePrice = (price: string) => {
+    const priceRegex = /^\d+(\.\d{1,2})?$/;
+    return price.trim() !== "" && priceRegex.test(price) && parseFloat(price) > 0;
+  };
+
+  const validateDescription = (description: string) => {
+    return description.trim().length >= 10;
+  };
+
   const submitAd = () => {
-    if (title && price && description && image) {
-      const newPost: Product = {
-        id: Date.now().toString(), // Unique ID using timestamp
-        title,
-        price,
-        description,
-        image,
-        category,
-      };
-      addPost(newPost);
-      Alert.alert("Success", `Ad posted successfully on ${new Date().toLocaleString("en-US", { timeZone: "Asia/Colombo" })}!`);
-      // Reset form
-      setTitle("");
-      setPrice("");
-      setDescription("");
-      setImage(null);
-      router.push("/"); // Navigate to home page
-    } else {
-      Alert.alert("Error", "Please fill all fields and upload an image");
+    if (!validateTitle(title)) {
+      Alert.alert("Error", "Title must be at least 3 characters long.");
+      return;
     }
+    if (!validatePrice(price)) {
+      Alert.alert("Error", "Price must be a positive number (e.g., 100 or 99.99).");
+      return;
+    }
+    if (!validateDescription(description)) {
+      Alert.alert("Error", "Description must be at least 10 characters long.");
+      return;
+    }
+    if (!image) {
+      Alert.alert("Error", "Please upload an image.");
+      return;
+    }
+
+    const newPost: Product = {
+      id: Date.now().toString(), // Unique ID using timestamp
+      title,
+      price,
+      description,
+      image,
+      category,
+    };
+    addPost(newPost);
+    Alert.alert("Success", `Ad posted successfully on ${new Date().toLocaleString("en-US", { timeZone: "Asia/Colombo" })}!`);
+    // Reset form
+    setTitle("");
+    setPrice("");
+    setDescription("");
+    setImage(null);
+    router.push("/"); // Navigate to home page
   };
 
   return (
