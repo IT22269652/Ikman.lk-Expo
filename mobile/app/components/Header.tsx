@@ -43,7 +43,7 @@ export default function Header() {
     }
 
     if (!contactNumber) {
-      Alert.alert("Error", "Contact number is required.................");
+      Alert.alert("Error", "Contact number is required............");
       return;
     } 
 
