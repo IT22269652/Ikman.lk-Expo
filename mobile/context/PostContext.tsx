@@ -4,6 +4,7 @@ import { Product } from "../types/types";
 interface PostContextType {
   posts: Product[];
   addPost: (post: Product) => void;
+  setPosts: React.Dispatch<React.SetStateAction<Product[]>>;
 }
 
 const PostContext = createContext<PostContextType | undefined>(undefined);
@@ -11,11 +12,16 @@ const PostContext = createContext<PostContextType | undefined>(undefined);
 export function PostProvider({ children }: { children: ReactNode }) {
   const [posts, setPosts] = useState<Product[]>([]);
 
+  // Add new post
   const addPost = (post: Product) => {
     setPosts((prevPosts) => [...prevPosts, post]);
   };
 
-  return <PostContext.Provider value={{ posts, addPost }}>{children}</PostContext.Provider>;
+  return (
+    <PostContext.Provider value={{ posts, addPost, setPosts }}>
+      {children}
+    </PostContext.Provider>
+  );
 }
 
 export const usePostContext = () => {

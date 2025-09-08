@@ -3,15 +3,15 @@ import { View, Text, TextInput, Button, Image, ScrollView, TouchableOpacity, Sty
 import { Picker } from "@react-native-picker/picker";
 import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
-import Header from "../components/Header";
 import { Product } from "../../types/types";
-import { usePostContext } from "../../context/PostContext"; // Adjusted import path
+import { usePostContext } from "../../context/PostContext";
+import Header from "../components/Header";
 
 export default function PostAd() {
-  const [title, setTitle] = useState<string>("");
-  const [category, setCategory] = useState<string>("Cars");
-  const [price, setPrice] = useState<string>("");
-  const [description, setDescription] = useState<string>("");
+  const [title, setTitle] = useState("");
+  const [category, setCategory] = useState("Vehicles");
+  const [price, setPrice] = useState("");
+  const [description, setDescription] = useState("");
   const [image, setImage] = useState<string | null>(null);
   const router = useRouter();
   const { addPost } = usePostContext();
@@ -23,38 +23,23 @@ export default function PostAd() {
       aspect: [4, 3],
       quality: 1,
     });
-    if (!result.canceled && result.assets && result.assets.length > 0) {
+    if (!result.canceled && result.assets?.length > 0) {
       setImage(result.assets[0].uri);
     }
   };
 
-  const removeImage = () => {
-    setImage(null);
-  };
-
-  const validateTitle = (title: string) => {
-    return title.trim().length >= 3;
-  };
-
-  const validatePrice = (price: string) => {
-    const priceRegex = /^\d+(\.\d{1,2})?$/;
-    return price.trim() !== "" && priceRegex.test(price) && parseFloat(price) > 0;
-  };
-
-  const validateDescription = (description: string) => {
-    return description.trim().length >= 10;
-  };
+  const removeImage = () => setImage(null);
 
   const submitAd = () => {
-    if (!validateTitle(title)) {
+    if (title.trim().length < 3) {
       Alert.alert("Error", "Title must be at least 3 characters long.");
       return;
     }
-    if (!validatePrice(price)) {
-      Alert.alert("Error", "Price must be a positive number (e.g., 100 or 99.99).");
+    if (!price || isNaN(Number(price)) || Number(price) <= 0) {
+      Alert.alert("Error", "Price must be a positive number.");
       return;
     }
-    if (!validateDescription(description)) {
+    if (description.trim().length < 10) {
       Alert.alert("Error", "Description must be at least 10 characters long.");
       return;
     }
@@ -64,30 +49,31 @@ export default function PostAd() {
     }
 
     const newPost: Product = {
-      id: Date.now().toString(), // Unique ID using timestamp
+      id: Date.now().toString(),
       title,
+      category,
       price,
       description,
       image,
-      category,
     };
+
     addPost(newPost);
-    Alert.alert("Success", `Ad posted successfully on ${new Date().toLocaleString("en-US", { timeZone: "Asia/Colombo" })}!`);
-    // Reset form
+    Alert.alert("Success", "Ad posted successfully!");
+    router.push("/post"); // go to all posts page
+
     setTitle("");
     setPrice("");
     setDescription("");
     setImage(null);
-    router.push("/"); // Navigate to home page
   };
 
   return (
     <View style={styles.container}>
-      <Header />
+       <Header />
       <ScrollView style={styles.scrollView}>
         <Text style={styles.title}>Post Ad</Text>
         <TextInput placeholder="Title" value={title} onChangeText={setTitle} style={styles.input} />
-        <Picker selectedValue={category} onValueChange={(value) => setCategory(value)} style={styles.picker}>
+        <Picker selectedValue={category} onValueChange={setCategory} style={styles.picker}>
           <Picker.Item label="Vehicles" value="Vehicles" />
           <Picker.Item label="Properties" value="Properties" />
           <Picker.Item label="Jobs" value="Jobs" />
@@ -118,18 +104,15 @@ const styles = StyleSheet.create({
   container: { flex: 1 },
   scrollView: { padding: 10 },
   title: { fontSize: 20, fontWeight: "bold", marginBottom: 10 },
-  input: { borderWidth: 1, padding: 10, marginBottom: 10, height: 100 },
+  input: { borderWidth: 1, padding: 10, marginBottom: 10, borderRadius: 5 },
   picker: { borderWidth: 1, marginBottom: 10 },
-  imageContainer: {
-    position: "relative",
-    marginTop: 10,
-  },
-  image: { width: 200, height: 200 },
+  imageContainer: { position: "relative", marginTop: 10 },
+  image: { width: 200, height: 200, borderRadius: 10 },
   removeButton: {
     position: "absolute",
     top: 5,
     right: 5,
-    backgroundColor: "rgba(0, 0, 0, 0.6)",
+    backgroundColor: "rgba(0,0,0,0.6)",
     borderRadius: 10,
     padding: 2,
   },
