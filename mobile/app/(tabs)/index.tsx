@@ -65,7 +65,7 @@ export default function Home() {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  headerImage: { width: "100%", height: 100, resizeMode: "cover" },
+  headerImage: { width: "100%", height: 200, resizeMode: "cover" },
   categoryTitle: {
     fontSize: 20,
     fontWeight: "bold",
